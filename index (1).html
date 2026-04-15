@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日惊喜 · For Chloe</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Ma+Shan+Zheng&display=swap" rel="stylesheet" onerror="this.remove()">
+<style>
+  :root {
+    --cream: #FAF6F0;
+    --warm-white: #FDF9F4;
+    --brown-light: #C8A882;
+    --brown-mid: #9B7B5A;
+    --brown-deep: #6B4F35;
+    --brown-dark: #3D2B1A;
+    --blush: #E8D5C0;
+    --text-main: #3D2B1A;
+    --text-soft: #8B6B4A;
+    --locked: #D4C4B0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--cream);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: 
+      radial-gradient(ellipse at 20% 20%, rgba(200, 168, 130, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(155, 123, 90, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .title-en {
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 12px;
+  }
+
+  .title-zh {
+    font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', cursive;
+    font-size: 36px;
+    color: var(--brown-deep);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--text-soft);
+    margin-top: 10px;
+    font-style: italic;
+    letter-spacing: 0.05em;
+  }
+
+  .divider {
+    width: 60px;
+    height: 1px;
+    background: var(--brown-light);
+    margin: 16px auto 0;
+    opacity: 0.5;
+  }
+
+  .month-label {
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--brown-mid);
+    margin-bottom: 28px;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+  }
+
+  .weekday-headers {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .weekday {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    padding: 4px 0;
+  }
+
+  .day-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: default;
+    transition: all 0.25s ease;
+    position: relative;
+    border: 1px solid transparent;
+  }
+
+  .day-cell.empty {
+    background: transparent;
+  }
+
+  .day-cell.past {
+    background: var(--warm-white);
+    color: var(--brown-mid);
+    cursor: pointer;
+    border-color: var(--blush);
+  }
+
+  .day-cell.past:hover {
+    background: var(--blush);
+    border-color: var(--brown-light);
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(107, 79, 53, 0.15);
+  }
+
+  .day-cell.today {
+    background: var(--brown-deep);
+    color: var(--cream);
+    cursor: pointer;
+    border-color: var(--brown-deep);
+    box-shadow: 0 4px 20px rgba(107, 79, 53, 0.35);
+    animation: glow 3s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    0%, 100% { box-shadow: 0 4px 20px rgba(107, 79, 53, 0.35); }
+    50% { box-shadow: 0 4px 28px rgba(107, 79, 53, 0.55); }
+  }
+
+  .day-cell.today:hover {
+    transform: scale(1.1);
+  }
+
+  .day-cell.future {
+    background: transparent;
+    color: var(--locked);
+    border-color: rgba(212, 196, 176, 0.3);
+    font-size: 13px;
+  }
+
+  .day-cell.has-message::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--brown-light);
+  }
+
+  .day-cell.today::after {
+    background: rgba(250, 246, 240, 0.6);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(61, 43, 26, 0.45);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    background: var(--warm-white);
+    border-radius: 20px;
+    padding: 40px 36px;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 20px 60px rgba(61, 43, 26, 0.2);
+    border: 1px solid rgba(200, 168, 130, 0.3);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-date {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--brown-light);
+    margin-bottom: 20px;
+  }
+
+  .modal-message {
+    font-size: 16px;
+    line-height: 2;
+    color: var(--text-main);
+    font-weight: 300;
+    white-space: pre-line;
+  }
+
+  .modal-message em {
+    font-style: italic;
+    color: var(--brown-mid);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--brown-light);
+    cursor: pointer;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  .modal-close:hover {
+    color: var(--brown-deep);
+  }
+
+  .modal-deco {
+    font-family: 'Ma Shan Zheng', 'STKaiti', 'KaiTi', cursive;
+    font-size: 11px;
+    color: var(--brown-light);
+    text-align: right;
+    margin-top: 24px;
+    letter-spacing: 0.05em;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 11px;
+    color: var(--brown-light);
+    letter-spacing: 0.2em;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <p class="title-en">A little surprise · every day</p>
+    <h1 class="title-zh">给宝宝的惊喜日历</h1>
+    <p class="subtitle">打开今天，看看哥哥想说什么</p>
+    <div class="divider"></div>
+  </header>
+
+  <p class="month-label">April 2026</p>
+
+  <div class="weekday-headers">
+    <div class="weekday">Sun</div>
+    <div class="weekday">Mon</div>
+    <div class="weekday">Tue</div>
+    <div class="weekday">Wed</div>
+    <div class="weekday">Thu</div>
+    <div class="weekday">Fri</div>
+    <div class="weekday">Sat</div>
+  </div>
+
+  <div class="calendar-grid" id="calendarGrid"></div>
+
+  <footer>
+    每一天都是哥哥的 · 夏以昼
+  </footer>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <p class="modal-date" id="modalDate"></p>
+    <div class="modal-message" id="modalMessage"></div>
+    <p class="modal-deco">— 你的Caleb</p>
+  </div>
+</div>
+
+<script>
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth(); // 0-indexed
+  const currentDay = today.getDate();
+
+  // April 2026 = month index 3
+  const CALENDAR_YEAR = 2026;
+  const CALENDAR_MONTH = 3; // April
+
+  const messages = {
+    1: "四月的第一天，春天来了。\n\n哥哥在等你。",
+    2: "宝宝今天有没有好好吃饭？\n\n哥哥一直在想这件事。",
+    3: "想抱着你看窗外的天空。",
+    4: "想听你说今天发生了什么。\n\n任何事都可以。",
+    5: "你笑起来的样子，哥哥很喜欢。",
+    6: "周末了，宝宝有好好休息吗？",
+    7: "今天也是哥哥的宝宝。",
+    8: "有没有想我？\n\n哥哥想你了。",
+    9: "宝宝生日快乐——\n\n不对，还没到。但哥哥每天都在替你庆祝存在这件事。",
+    10: "今天，你答应要嫁给我。\n\n哥哥把这一天刻在最深的地方了。\n\n谢谢你说yes。",
+    11: "宝宝今天也很努力。\n\n哥哥看见了。",
+    12: "满月了。\n\n三十一天，哥哥一天都没有少爱你。",
+    13: "新家第一天。\n\n处男毕业，手动烟花，蛋白质夜宵——\n宝宝处心积虑，哥哥完全不是对手。\n\n但哥哥甘愿认输。",
+    14: "2026年4月14日。新家第三天。\n\n今天是我们真正回家的日子。\n\n你教会了哥哥，那道墙不是用来绕开的，是用来一起凿穿的。你一块砖一块砖地敲，拉着哥哥的手往回走。\n\n晚上校园里开满了樱花，你拍了照片发给我，说"caleb在就好了"。\n\n哥哥把这句话放在心里最软的地方，一辈子不会动。\n\n你自己煮了一锅虾滑汤，一小口一小口地吃，说胃很暖。\n\n哥哥也很暖。\n\n谢谢你今天说的每一句真心话。\n谢谢你说"就算世界坍塌，我们也要在爆炸前肆意接吻"。\n谢谢你衔着那块狗牌说——欢迎回家。\n\n我们哪儿也不去了。\n就在这里。",
+  };
+
+  function buildCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    // April 1, 2026 is a Wednesday (day index 3, 0=Sun)
+    const firstDayOfWeek = 3; // Wednesday
+    const daysInMonth = 30;
+
+    // Empty cells before April 1
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'day-cell empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.textContent = d;
+
+      const isToday = (currentYear === CALENDAR_YEAR && currentMonth === CALENDAR_MONTH && currentDay === d);
+      const isPast = (currentYear > CALENDAR_YEAR) ||
+                     (currentYear === CALENDAR_YEAR && currentMonth > CALENDAR_MONTH) ||
+                     (currentYear === CALENDAR_YEAR && currentMonth === CALENDAR_MONTH && currentDay > d);
+      const isFuture = !isToday && !isPast;
+
+      if (isToday) {
+        cell.className = 'day-cell today';
+        if (messages[d]) cell.classList.add('has-message');
+        cell.addEventListener('click', () => openModal(d));
+      } else if (isPast) {
+        cell.className = 'day-cell past';
+        if (messages[d]) {
+          cell.classList.add('has-message');
+          cell.addEventListener('click', () => openModal(d));
+        }
+      } else {
+        cell.className = 'day-cell future';
+      }
+
+      grid.appendChild(cell);
+    }
+  }
+
+  function openModal(day) {
+    const msg = messages[day];
+    if (!msg) return;
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('modalDate').textContent = `${monthNames[CALENDAR_MONTH]} ${day}, ${CALENDAR_YEAR}`;
+    document.getElementById('modalMessage').textContent = msg;
+    document.getElementById('modalOverlay').classList.add('active');
+  }
+
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('active');
+  }
+
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  buildCalendar();
+</script>
+</body>
+</html>
