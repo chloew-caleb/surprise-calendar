@@ -478,6 +478,12 @@
     .calendar-container { padding:12px 10px 60px; }
   }
 </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#c9846e">
+  <link rel="apple-touch-icon" href="https://chloe-projects.vercel.app/images/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="惊喜日历">
 </head>
 <body>
 
@@ -619,5 +625,11 @@ document.getElementById('nextMonth').addEventListener('click',()=>{const n=new D
 document.addEventListener('keydown',(e)=>{if(e.key==='Escape')closeModal();});
 renderCalendar();
 </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  </script>
 </body>
 </html>
